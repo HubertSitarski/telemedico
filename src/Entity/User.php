@@ -5,10 +5,12 @@ namespace App\Entity;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Serializer\Annotation\Groups;
+use App\Constants\Serialization\UserSerialization;
 
 /**
  * @ORM\Entity(repositoryClass="App\Repository\UserRepository")
- * @UniqueEntity(fields={"email"}, message="There is already an account with this email")
+ * @UniqueEntity(fields={"email"}, message="Istnieje konto z podanym adresem e-mail!")
  */
 class User implements UserInterface
 {
@@ -16,16 +18,29 @@ class User implements UserInterface
      * @ORM\Id()
      * @ORM\GeneratedValue()
      * @ORM\Column(type="integer")
+     * @Groups({
+     *     UserSerialization::USERS_LIST,
+     *     UserSerialization::USER_DETAILS,
+     *     UserSerialization::USER_ADD,
+     *     UserSerialization::USER_UPDATE
+     *     })
      */
     private $id;
 
     /**
      * @ORM\Column(type="string", length=180, unique=true)
+     * @Groups({
+     *     UserSerialization::USERS_LIST,
+     *     UserSerialization::USER_DETAILS,
+     *     UserSerialization::USER_ADD,
+     *     UserSerialization::USER_UPDATE
+     *     })
      */
     private $email;
 
     /**
      * @ORM\Column(type="json")
+     * @Groups({UserSerialization::USERS_LIST, UserSerialization::USER_DETAILS})
      */
     private $roles = [];
 
@@ -34,6 +49,12 @@ class User implements UserInterface
      * @ORM\Column(type="string")
      */
     private $password;
+
+    /**
+     * @var string
+     * @Groups({UserSerialization::USER_ADD, UserSerialization::USER_UPDATE})
+     */
+    private $plainPassword;
 
     /**
      * @ORM\Column(type="string", unique=true, nullable=true)
@@ -97,6 +118,7 @@ class User implements UserInterface
     public function setPassword(string $password): self
     {
         $this->password = $password;
+        $this->plainPassword = null;
 
         return $this;
     }
@@ -123,6 +145,17 @@ class User implements UserInterface
     public function setToken(?string $token): self
     {
         $this->token = $token;
+
+        return $this;
+    }
+
+    public function getPlainPassword()
+    {
+        return $this->plainPassword;
+    }
+    public function setPlainPassword(?string $plainPassword): self
+    {
+        $this->plainPassword = $plainPassword;
 
         return $this;
     }
