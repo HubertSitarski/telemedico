@@ -1,0 +1,24 @@
+{% extends 'base.html.twig' %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('css/registration.css') }}">
+{% endblock %}
+
+{% block title %}Register{% endblock %}
+
+{% block body %}
+    {{ form_start(registrationForm, { 'attr': {'class': 'form-register'} }) }}
+        <h1 class="h3 mb-3 font-weight-normal">Rejestracja</h1>
+
+        {{ form_row(registrationForm.email, { 'attr': {'class': 'form-control'} }) }}
+        {{ form_row(registrationForm.plainPassword, { 'attr': {'class': 'form-control'} }) }}
+
+    <button class="btn btn-lg btn-primary" type="submit">
+        Zarejestruj się
+    </button>
+    <br>
+    <br>
+    <a href="{{ path('app_login') }}">Logowanie</a>
+    {{ form_end(registrationForm) }}
+{% endblock %}
