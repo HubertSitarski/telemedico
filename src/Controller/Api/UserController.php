@@ -18,7 +18,7 @@ use Symfony\Component\Validator\Exception\ValidatorException;
 class UserController extends BaseController
 {
     /**
-     * @Route("/", name="users_list")
+     * @Route("/", name="users_list", methods={"GET"})
      */
     public function index(UserManager $userManager)
     {
@@ -26,7 +26,7 @@ class UserController extends BaseController
     }
 
     /**
-     * @Route("/get/{id}", name="user_details")
+     * @Route("/get/{id}", name="user_details", methods={"GET"})
      */
     public function getUserDetails(int $id, UserManager $userManager)
     {
@@ -34,7 +34,7 @@ class UserController extends BaseController
     }
 
     /**
-     * @Route("/create", name="user_add")
+     * @Route("/create", name="user_add", methods={"POST"})
      */
     public function createUser(Request $request, UserManager $userManager)
     {
@@ -58,32 +58,41 @@ class UserController extends BaseController
     }
 
     /**
-     * @Route("/update/{id}", name="user_update")
+     * @Route("/update/{id}", name="user_update", methods={"PUT"})
      */
     public function updateUser(int $id, Request $request, UserManager $userManager)
     {
         try {
-            $user = $this->jsonDeserialize(
-                $request->getContent(),
-                User::class,
-                UserSerialization::USER_UPDATE,
-                $userManager->getUser($id)
-            );
+            if ($userManager->getUser($id)) {
+                $user = $this->jsonDeserialize(
+                    $request->getContent(),
+                    User::class,
+                    UserSerialization::USER_UPDATE,
+                    $userManager->getUser($id)
+                );
 
-            $this->validate($user);
+                $this->validate($user);
 
-            return $this->jsonResponse($userManager->updateUser($user), UserSerialization::USER_UPDATE);
+                return $this->jsonResponse($userManager->updateUser($user), UserSerialization::USER_UPDATE);
+            }
+
+            return $this->jsonResponse(['error' => 'Nie znaleziono obiektu'], [], Response::HTTP_NOT_FOUND);
         } catch (ValidatorException $exception) {
             return new Response($exception->getMessage(), Response::HTTP_BAD_REQUEST);
         }
     }
 
     /**
-     * @Route("/delete/{id}", name="user_remove")
+     * @Route("/delete/{id}", name="user_remove", methods={"DELETE"})
      */
     public function removeUser(int $id, UserManager $userManager)
     {
-        $userManager->removeUser($userManager->getUser($id));
-        return $this->jsonResponse('Usunieto obiekt', []);
+        if ($userManager->getUser($id)) {
+            $userManager->removeUser($userManager->getUser($id));
+
+            return $this->jsonResponse(['message' => 'Usunięto obiekt'], []);
+        }
+
+        return $this->jsonResponse(['error' => 'Nie znaleziono obiektu'], [], Response::HTTP_NOT_FOUND);
     }
 }
