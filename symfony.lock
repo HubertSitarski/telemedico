@@ -90,6 +90,15 @@
     "php": {
         "version": "7.2"
     },
+    "phpdocumentor/reflection-common": {
+        "version": "2.0.0"
+    },
+    "phpdocumentor/reflection-docblock": {
+        "version": "5.1.0"
+    },
+    "phpdocumentor/type-resolver": {
+        "version": "1.1.0"
+    },
     "psr/cache": {
         "version": "1.0.1"
     },
@@ -249,6 +258,9 @@
     "symfony/property-access": {
         "version": "v4.4.7"
     },
+    "symfony/property-info": {
+        "version": "v4.4.7"
+    },
     "symfony/routing": {
         "version": "4.2",
         "recipe": {
@@ -286,6 +298,12 @@
     },
     "symfony/security-http": {
         "version": "v4.4.7"
+    },
+    "symfony/serializer": {
+        "version": "v4.4.7"
+    },
+    "symfony/serializer-pack": {
+        "version": "v1.0.3"
     },
     "symfony/service-contracts": {
         "version": "v1.1.8"
@@ -346,6 +364,9 @@
     },
     "twig/twig": {
         "version": "v2.12.5"
+    },
+    "webmozart/assert": {
+        "version": "1.8.0"
     },
     "zendframework/zend-code": {
         "version": "3.4.1"
