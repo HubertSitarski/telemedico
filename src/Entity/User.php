@@ -7,6 +7,7 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Serializer\Annotation\Groups;
 use App\Constants\Serialization\UserSerialization;
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * @ORM\Entity(repositoryClass="App\Repository\UserRepository")
@@ -29,6 +30,8 @@ class User implements UserInterface
 
     /**
      * @ORM\Column(type="string", length=180, unique=true)
+     * @Assert\NotBlank(message="E-mail nie może być pusty")
+     * @Assert\Email()
      * @Groups({
      *     UserSerialization::USERS_LIST,
      *     UserSerialization::USER_DETAILS,
@@ -52,6 +55,8 @@ class User implements UserInterface
 
     /**
      * @var string
+     * @Assert\NotBlank(message="Hasło nie może być puste")
+     * @Assert\Length(min="6", minMessage="Twoje hasło powinno zawierać minimum {{ limit }} znaków")
      * @Groups({UserSerialization::USER_ADD, UserSerialization::USER_UPDATE})
      */
     private $plainPassword;

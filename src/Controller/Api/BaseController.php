@@ -6,6 +6,8 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Component\Serializer\SerializerInterface;
+use Symfony\Component\Validator\Exception\ValidatorException;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 /**
  * Class BaseController
@@ -14,10 +16,12 @@ use Symfony\Component\Serializer\SerializerInterface;
 class BaseController extends AbstractController
 {
     private $serializer;
+    private $validator;
 
-    public function __construct(SerializerInterface $serializer)
+    public function __construct(SerializerInterface $serializer, ValidatorInterface $validator)
     {
         $this->serializer = $serializer;
+        $this->validator = $validator;
     }
 
     protected function jsonResponse($data, $groups, $code = null): Response
@@ -38,5 +42,20 @@ class BaseController extends AbstractController
             $context[AbstractNormalizer::OBJECT_TO_POPULATE] = $objectToPopulate;
         }
         return $this->serializer->deserialize($data, $type, 'json', $context);
+    }
+
+    protected function validate($object)
+    {
+        $errors = $this->validator->validate($object);
+
+        if (count($errors) > 0) {
+            $errorsArray = [];
+
+            foreach ($errors as $error) {
+                $errorsArray[]['error']= ($error->getMessage());
+            }
+
+            throw new ValidatorException($this->serializer->serialize($errorsArray, 'json'));
+        }
     }
 }

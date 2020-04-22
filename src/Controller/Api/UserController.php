@@ -8,6 +8,7 @@ use App\Manager\UserManager;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Validator\Exception\ValidatorException;
 
 /**
  * Class UserController
@@ -37,16 +38,23 @@ class UserController extends BaseController
      */
     public function createUser(Request $request, UserManager $userManager)
     {
-        $user = $userManager
-            ->updateUser(
-                $this->jsonDeserialize(
-                    $request->getContent(),
-                    User::class,
-                    UserSerialization::USER_ADD
-                )
+        try {
+            $user = $this->jsonDeserialize(
+                $request->getContent(),
+                User::class,
+                UserSerialization::USER_ADD
             );
 
-        return $this->jsonResponse($user, UserSerialization::USER_ADD, Response::HTTP_CREATED);
+            $this->validate($user);
+
+            return $this->jsonResponse(
+                $userManager->updateUser($user),
+                UserSerialization::USER_ADD,
+                Response::HTTP_CREATED
+            );
+        } catch (ValidatorException $exception) {
+            return new Response($exception->getMessage(), Response::HTTP_BAD_REQUEST);
+        }
     }
 
     /**
@@ -54,17 +62,20 @@ class UserController extends BaseController
      */
     public function updateUser(int $id, Request $request, UserManager $userManager)
     {
-        $user = $userManager
-            ->updateUser(
-                $this->jsonDeserialize(
-                    $request->getContent(),
-                    User::class,
-                    UserSerialization::USER_UPDATE,
-                    $userManager->getUser($id)
-                )
+        try {
+            $user = $this->jsonDeserialize(
+                $request->getContent(),
+                User::class,
+                UserSerialization::USER_UPDATE,
+                $userManager->getUser($id)
             );
 
-        return $this->jsonResponse($user, UserSerialization::USER_UPDATE);
+            $this->validate($user);
+
+            return $this->jsonResponse($userManager->updateUser($user), UserSerialization::USER_UPDATE);
+        } catch (ValidatorException $exception) {
+            return new Response($exception->getMessage(), Response::HTTP_BAD_REQUEST);
+        }
     }
 
     /**
