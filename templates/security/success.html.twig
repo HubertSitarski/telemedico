@@ -1,0 +1,13 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Login success{% endblock %}
+
+{% block body %}
+<form method="post">
+    {% if app.user %}
+        <div class="mb-3">
+            You are logged in as {{ app.user.username }}, <a href="{{ path('app_logout') }}">Logout</a>
+        </div>
+    {% endif %}
+</form>
+{% endblock %}
