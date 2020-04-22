@@ -5,6 +5,7 @@
 1. Pobieramy projekt
 2. Uruchamiamy `composer install`
 3. Kopiujemy zawartość pliku `.env` do pliku `.env.local` i ustawiamy dane bazy danych
+4. Uruchamiamy `php bin/console doctrine:migrations:migrate` lub `php bin/console doctrine:schema:update`
 
 ## 2. Linki
 
