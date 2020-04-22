@@ -31,6 +31,7 @@ class BaseController extends AbstractController
         if ($code !== null) {
             $status = $code;
         }
+
         return new Response($this->serializer->serialize($data, 'json', ['groups' => $groups]), $status);
     }
 
@@ -41,6 +42,7 @@ class BaseController extends AbstractController
         if ($objectToPopulate !== null) {
             $context[AbstractNormalizer::OBJECT_TO_POPULATE] = $objectToPopulate;
         }
+
         return $this->serializer->deserialize($data, $type, 'json', $context);
     }
 
