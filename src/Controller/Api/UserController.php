@@ -2,6 +2,8 @@
 
 namespace App\Controller\Api;
 
+use App\Constants\Responses\Responses;
+use App\Constants\Serialization\BaseSerialization;
 use App\Constants\Serialization\UserSerialization;
 use App\Entity\User;
 use App\Manager\UserManager;
@@ -38,23 +40,23 @@ class UserController extends BaseController
      */
     public function createUser(Request $request, UserManager $userManager)
     {
+        $user = $this->jsonDeserialize(
+            $request->getContent(),
+            User::class,
+            UserSerialization::USER_ADD
+        );
+
         try {
-            $user = $this->jsonDeserialize(
-                $request->getContent(),
-                User::class,
-                UserSerialization::USER_ADD
-            );
-
             $this->validate($user);
-
-            return $this->jsonResponse(
-                $userManager->updateUser($user),
-                UserSerialization::USER_ADD,
-                Response::HTTP_CREATED
-            );
         } catch (ValidatorException $exception) {
-            return new Response($exception->getMessage(), Response::HTTP_BAD_REQUEST);
+            return $this->returnBadRequest($exception);
         }
+
+        return $this->jsonResponse(
+            $userManager->updateUser($user),
+            UserSerialization::USER_ADD,
+            Response::HTTP_CREATED
+        );
     }
 
     /**
@@ -62,24 +64,28 @@ class UserController extends BaseController
      */
     public function updateUser(int $id, Request $request, UserManager $userManager)
     {
-        try {
-            if ($userManager->getUser($id)) {
-                $user = $this->jsonDeserialize(
-                    $request->getContent(),
-                    User::class,
-                    UserSerialization::USER_UPDATE,
-                    $userManager->getUser($id)
-                );
+        if ($userManager->getUser($id)) {
+            $user = $this->jsonDeserialize(
+                $request->getContent(),
+                User::class,
+                UserSerialization::USER_UPDATE,
+                $userManager->getUser($id)
+            );
 
+            try {
                 $this->validate($user);
-
-                return $this->jsonResponse($userManager->updateUser($user), UserSerialization::USER_UPDATE);
+            } catch (ValidatorException $exception) {
+                return $this->returnBadRequest($exception);
             }
 
-            return $this->jsonResponse(['error' => 'Nie znaleziono obiektu'], [], Response::HTTP_NOT_FOUND);
-        } catch (ValidatorException $exception) {
-            return new Response($exception->getMessage(), Response::HTTP_BAD_REQUEST);
+            return $this->jsonResponse($userManager->updateUser($user), UserSerialization::USER_UPDATE);
         }
+
+        return $this->jsonResponse(
+            ['error' => Responses::OBJECT_NOT_FOUND],
+            BaseSerialization::EMPTY_GROUPS,
+            Response::HTTP_NOT_FOUND
+        );
     }
 
     /**
@@ -90,9 +96,13 @@ class UserController extends BaseController
         if ($userManager->getUser($id)) {
             $userManager->removeUser($userManager->getUser($id));
 
-            return $this->jsonResponse(['message' => 'Usunięto obiekt'], []);
+            return $this->jsonResponse(['message' => Responses::OBJECT_DELETED], BaseSerialization::EMPTY_GROUPS);
         }
 
-        return $this->jsonResponse(['error' => 'Nie znaleziono obiektu'], [], Response::HTTP_NOT_FOUND);
+        return $this->jsonResponse(
+            ['error' => Responses::OBJECT_NOT_FOUND],
+            BaseSerialization::EMPTY_GROUPS,
+            Response::HTTP_NOT_FOUND
+        );
     }
 }
